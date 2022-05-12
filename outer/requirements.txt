@@ -1,5 +1,6 @@
 
 
+alembic
 pydantic
 uvicorn
 sqlalchemy
@@ -23,9 +24,6 @@ python-multipart
 aws-xray-sdk
 psycopg2-binary
 asgi-lifespan==1.0.1
-
-# for performance testing
-tqdm
 
 # linter
 mypy

@@ -1,0 +1,83 @@
+name: Python CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      ENV: github
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: user
+          POSTGRES_USER: user
+          POSTGRES_DB: parts
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [ '3.9' ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+      - name: Restore modules
+        run: |
+          pip install -r requirements.txt
+      - name: Check code style
+        run: |
+          pycodestyle --statistics --exclude=.github,.vscode,.git,docs,.devcontainer,app/db/migration/versions/ . --ignore="E501"
+      # - name: Check type hinting
+      #   run: |
+      #     mypy --strict --exclude 'app/db/migration/versions/'  app/
+      - name: run migration
+        run: |
+          alembic -c app/db/migration/alembic.ini upgrade head
+      - name: insert master data
+        run: |
+          python app/db/init_database.py
+      - name: Test python
+        run: |
+          coverage run --source=tests/ -m pytest tests/
+        env:
+          ENV: github
+      - name: Report coverage
+        if: ${{ success() }}
+        run: |
+          coverage report -m
+  publish:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: [ test ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: |
+            src/
+            !src/**/__pycache__

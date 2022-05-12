@@ -1,0 +1,52 @@
+{
+  "name": "Python Project",
+  // "dockerFile": "Dockerfile",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/var/www",
+  "settings": {
+    // "terminal.integrated.shell.linux": "/bin/ash",
+    "terminal.integrated.defaultProfile.linux": "ash",
+    "terminal.integrated.profiles.linux":{
+      "ash":{
+        "path": "/bin/ash",
+      },
+      "bash": {
+        "path": "bash",
+        "icon": "terminal-bash"
+      },
+      "zsh": {
+        "path": "zsh"
+      },
+      "fish": {
+        "path": "fish"
+      },
+      "tmux": {
+        "path": "tmux",
+        "icon": "terminal-tmux"
+      },
+      "pwsh": {
+        "path": "pwsh",
+        "icon": "terminal-powershell"
+      }
+    },
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.autoComplete.extraPaths": ["/usr/local/bin/python", "${HOME}/.local/lib/python3.8/site-packages/"],
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": ["--ignore=E402,E501"],
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": [
+      "--ignore",
+      "E402,E501",
+      "--max-line-length",
+      "150"
+    ],
+    "[python]": {
+      "editor.formatOnSave": true
+    }
+  },
+  "extensions": ["ms-python.python", "janisdd.vscode-edit-csv", "eamodio.vscode-gitlens"],
+  "postCreateCommand": "pip install -r requirements_devcontainer.txt",
+  "initializeCommand": "${localWorkspaceFolder}/.devcontainer/init.sh"
+}

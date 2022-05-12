@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  workspace:
+    build:
+      context: ./workspace
+      args:
+        USERNAME: $USERNAME
+        UID: $UID
+        GID: $GID
+    tty: true
+    volumes:
+      - ../:/var/www/
+    

@@ -52,7 +52,7 @@ jobs:
           pycodestyle --statistics --exclude=.github,.vscode,.git,docs,.devcontainer,inner/app/db/migration/versions/,outer/app/db/migration/versions/ . --ignore="E501"
       - name: run inner migration
         run: |
-          alembic -c inner/app/db/migration/alembic.ini upgrade head
+          alembic -c ./inner/app/db/migration/alembic.ini upgrade head
       - name: run outer migration
         run: |
-          alembic -c outer/app/db/migration/alembic.ini upgrade head
+          alembic -c ./outer/app/db/migration/alembic.ini upgrade head

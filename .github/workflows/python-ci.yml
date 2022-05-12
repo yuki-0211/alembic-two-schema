@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-pip-${{ matrix.python-version }}-
       - name: Restore modules
         run: |
-          pip install -r requirements.txt
+          pip install -r inner/requirements.txt
       - name: Check code style
         run: |
           pycodestyle --statistics --exclude=.github,.vscode,.git,docs,.devcontainer,app/db/migration/versions/ . --ignore="E501"

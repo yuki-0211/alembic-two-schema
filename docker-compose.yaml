@@ -1,0 +1,57 @@
+version: "3"
+services:
+  db:
+    image: postgres:11.4-alpine 
+    container_name: schema_test_postgres
+    volumes:
+      - db_volume:/var/lib/postgresql/data:cached
+    environment:
+      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: psql -c 'select 1;'  2>&1 > /dev/null -U ${DB_USER} -d ${DB_NAME}
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+
+  inner:
+    build:
+      context: ./inner/
+      args:
+        - http_proxy
+        - HTTP_PROXY
+        - https_proxy
+        - HTTPS_PROXY
+    container_name: inner_migration
+    volumes:
+      - ./inner/app/:/app/
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  outer:
+    build:
+      context: ./outer/
+      args:
+        - http_proxy
+        - HTTP_PROXY
+        - https_proxy
+        - HTTPS_PROXY
+    container_name: outer_migration
+    volumes:
+      - ./outer/app/:/app/
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  db_volume:
+    driver: local

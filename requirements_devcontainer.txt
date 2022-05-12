@@ -1,0 +1,40 @@
+# devcontainer用
+# psycopg2-binaryを含めない（インストール時にエラー）
+
+fastapi
+mangum
+pydantic
+uvicorn
+sqlalchemy
+sqlalchemy[mypy]
+asyncpg
+loguru
+jinjasql
+python-dotenv
+ldap3
+pyjwt
+pyhumps
+boto3
+numpy
+pandas
+ulid-py
+pyyaml
+email-validator
+python-multipart
+aws-xray-sdk
+
+# for unit testing
+alembic
+docker
+pytest
+pytest-cov
+pytest-asyncio
+pytest-env
+pytest-ordering
+asgi-lifespan
+httpx
+
+# for performance testing
+tqdm
+mypy
+pycodestyle

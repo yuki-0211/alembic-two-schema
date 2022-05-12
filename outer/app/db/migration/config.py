@@ -1,12 +1,10 @@
 import logging
 import os
 import sys
-from typing import Optional
 
 from app.db.migration.logging import InterceptHandler
 from loguru import logger
 from pydantic import BaseSettings
-from pydantic.networks import EmailStr
 
 
 def _get_cfg_name() -> str:
@@ -28,7 +26,6 @@ def _is_debug() -> bool:
 class GlobalSettings(BaseSettings):
     project_name: str = 'Parts Management'
     version: str = '0.0.1'
-    is_aws: bool = _is_aws()
     debug: bool = _is_debug()
 
 

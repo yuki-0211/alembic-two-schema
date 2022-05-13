@@ -52,6 +52,9 @@ jobs:
           pycodestyle --statistics --exclude=.github,.vscode,.git,docs,.devcontainer,inner/app/db/migration/versions/,outer/app/db/migration/versions/ . --ignore="E501"
       - name: Check current dir
         run: |
+          pwd
+      - name: Check dir
+        run: |
           ls -a
       - name: run inner migration
         run: |

@@ -7,7 +7,7 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.schema import CreateSchema
 from app.db.migration.config import DBSettings
 
-from app.db.models import (Base, outer)
+from app.db.models import (Base, outer, inner)
 
 INNER_SCHEMA: str = DBSettings().inner_db_schema
 OUTER_SCHEMA: str = DBSettings().outer_db_schema
@@ -24,7 +24,7 @@ fileConfig(str(config.config_file_name))
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = [Base.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -61,7 +61,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,  # 追加
-        include_schemas=True,
+        # include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -77,12 +77,15 @@ def run_migrations_online() -> None:
     """
 
     cmd_opts = config.cmd_opts
-    if cmd_opts:
-        cmd = cmd_opts.cmd[0]  # ignore: type
-        cmd_name = getattr(cmd, '__name__')
-    else:
-        cmd_name = ""
+    cmd = cmd_opts.cmd[0]  # ignore: type
+    cmd_name = getattr(cmd, '__name__')
 
+    schema = config.config_ini_section
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = config.get_main_option("sqlalchemy.url")
+    connectable = engine_from_config(
+        configuration, prefix="sqlalchemy.", poolclass=pool.NullPool,
+    )
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
@@ -99,12 +102,20 @@ def run_migrations_online() -> None:
             version_table_schema = None
 
         # スキーマ存在確認
+        if not connection.dialect.has_schema(connection, INNER_SCHEMA):  # type: ignore
+            connection.execute(CreateSchema(INNER_SCHEMA))
+            exist_schema = False
+        else:
+            exist_schema = True
+        logger.info(exist_schema)
+
         if not connection.dialect.has_schema(connection, OUTER_SCHEMA):  # type: ignore
             connection.execute(CreateSchema(OUTER_SCHEMA))
             exist_schema = False
         else:
             exist_schema = True
         logger.info(exist_schema)
+
         # 拡張機能追加
         connection.execute("create extension IF NOT EXISTS pgcrypto")
         connection.execute('create extension IF NOT EXISTS "uuid-ossp"')
@@ -124,8 +135,8 @@ def run_migrations_online() -> None:
             target_metadata=target_metadata,
             version_table_schema=version_table_schema,
             compare_type=True,
-            include_schemas=True,
-            include_object=include_object
+            # include_schemas=True,
+            # include_object=include_object
         )
 
         with context.begin_transaction():

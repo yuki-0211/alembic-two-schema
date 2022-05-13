@@ -50,6 +50,9 @@ jobs:
       - name: Check code style
         run: |
           pycodestyle --statistics --exclude=.github,.vscode,.git,docs,.devcontainer,inner/app/db/migration/versions/,outer/app/db/migration/versions/ . --ignore="E501"
+      - name: Check current dir
+        run: |
+          ls -a
       - name: run inner migration
         run: |
           alembic -c ./inner/app/db/migration/alembic.ini upgrade head
